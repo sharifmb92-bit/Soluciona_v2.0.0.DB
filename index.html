@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soluciona_v 2.0.0</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.3); border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- HEADER / NAVEGACIÓN SUPERIOR -->
+    <header class="sticky top-0 z-30 bg-gray-900/95 backdrop-blur border-b border-gray-800 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-brand-500/20">
+                    S
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-2">
+                        Soluciona <span class="text-[10px] bg-brand-500/20 text-brand-400 border border-brand-500/30 px-1.5 py-0.5 rounded font-mono">v2.0.0</span>
+                    </h1>
+                    <span class="text-xs text-gray-400">Centro de ejecución directa</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="openWelcomeModal()" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors" title="Instrucciones">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+                <button onclick="openNewModal()" class="px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm transition-colors flex items-center gap-1.5 shadow-md shadow-brand-600/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span>Añadir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-6">
+
+        <!-- BÚSQUEDA Y FILTROS -->
+        <section class="space-y-4">
+            <div class="relative">
+                <input type="text" id="searchInput" oninput="filterSolutions()" placeholder="¿Qué necesitas resolver hoy? (Ej: HTTPS, Trámites, Comandos...)" 
+                       class="w-full bg-gray-800 border border-gray-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-inner">
+                <svg class="w-5 h-5 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+
+            <!-- Categorías / Pilares -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar text-sm">
+                <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-4 py-2 rounded-lg bg-brand-600 text-white font-medium whitespace-nowrap">Todos</button>
+                <button onclick="setFilter('tech_dev')" id="filter-tech_dev" class="filter-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium whitespace-nowrap">💻 Tech & Dev</button>
+                <button onclick="setFilter('productividad')" id="filter-productividad" class="filter-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium whitespace-nowrap">⚡ Productividad</button>
+                <button onclick="setFilter('tramites')" id="filter-tramites" class="filter-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium whitespace-nowrap">📜 Trámites</button>
+                <button onclick="setFilter('emprendimiento')" id="filter-emprendimiento" class="filter-btn px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium whitespace-nowrap">🚀 Emprendimiento</button>
+            </div>
+
+            <!-- Filtro por Tiempo -->
+            <div class="flex items-center gap-2 text-xs text-gray-400 border-t border-gray-800 pt-3">
+                <span class="font-semibold text-gray-500 uppercase tracking-wider">Tiempo:</span>
+                <button onclick="setTimeFilter('all')" id="time-all" class="time-btn text-brand-400 font-bold underline">Cualquiera</button>
+                <button onclick="setTimeFilter(2)" id="time-2" class="time-btn hover:text-white">&lt; 2 min</button>
+                <button onclick="setTimeFilter(5)" id="time-5" class="time-btn hover:text-white">&lt; 5 min</button>
+            </div>
+        </section>
+
+        <!-- FEED DE SOLUCIONES -->
+        <section id="solutionsFeed" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Carga dinámicamente desde IndexedDB -->
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: MODO ENFOQUE -->
+    <div id="focusModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+            <div class="flex justify-between items-start border-b border-gray-700 pb-3">
+                <div>
+                    <span id="focusCategory" class="text-xs font-bold text-brand-400 uppercase tracking-wider">Modo Enfoque</span>
+                    <h3 id="focusTitle" class="text-lg font-bold text-white leading-snug">Cargando...</h3>
+                </div>
+                <button onclick="closeFocusModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <!-- Barra de Progreso -->
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs text-gray-400">
+                    <span>Progreso de ejecución</span>
+                    <span id="focusProgressText">0%</span>
+                </div>
+                <div class="w-full bg-gray-900 rounded-full h-2">
+                    <div id="focusProgressBar" class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Pasos -->
+            <div id="focusStepsContainer" class="space-y-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1"></div>
+
+            <div class="pt-2 border-t border-gray-700 flex justify-between items-center">
+                <span class="text-xs text-emerald-400 flex items-center gap-1">✓ Verificado en 2026</span>
+                <button onclick="closeFocusModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl text-sm transition-colors">
+                    Finalizar Tarea
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: BIENVENIDA / TUTORIAL -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-500 flex items-center justify-center mx-auto text-2xl font-bold">
+                    🚀
+                </div>
+                <h3 class="text-xl font-bold text-white">Soluciona v2.0.0</h3>
+                <p class="text-sm text-gray-300">Tu centro de ejecución directa sin rodeos.</p>
+            </div>
+
+            <div class="space-y-3 text-sm text-gray-300">
+                <div class="flex items-start gap-3 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50">
+                    <span class="text-brand-500 font-bold">1.</span>
+                    <p><strong>Modo Enfoque:</strong> Ejecuta guías paso a paso de forma guiada e interactiva.</p>
+                </div>
+                <div class="flex items-start gap-3 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50">
+                    <span class="text-brand-500 font-bold">2.</span>
+                    <p><strong>Copia en 1-Clic:</strong> Copia comandos y snippets limpios al instante.</p>
+                </div>
+                <div class="flex items-start gap-3 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50">
+                    <span class="text-brand-500 font-bold">3.</span>
+                    <p><strong>Offline y Persistente:</strong> Todo tu contenido se almacena de forma segura en IndexedDB.</p>
+                </div>
+            </div>
+
+            <button onclick="closeWelcomeModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-600/20">
+                ¡Entendido!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CREAR SOLUCIÓN -->
+    <div id="newSolutionModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3">
+                <h3 class="text-lg font-bold text-white">Publicar Solución Práctica</h3>
+                <button onclick="closeNewModal()" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+
+            <form id="solutionForm" onsubmit="handleSaveSolution(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pilar</label>
+                        <select id="formPilar" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500" required>
+                            <option value="tech_dev">💻 Tech & Dev</option>
+                            <option value="productividad">⚡ Productividad</option>
+                            <option value="tramites">📜 Trámites</option>
+                            <option value="emprendimiento">🚀 Emprendimiento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tiempo Est. (Min)</label>
+                        <input type="number" id="formTiempo" min="1" max="60" value="2" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Título del Problema</label>
+                    <input type="text" id="formTitulo" placeholder="Ej: ¿Cómo renovar certificado digital en 3 min?" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Snippet / Código (Opcional)</label>
+                    <input type="text" id="formSnippet" placeholder="Ej: sudo systemctl restart nginx" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-brand-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Resumen Exprés (3 viñetas)</label>
+                    <textarea id="formResumen" rows="3" placeholder="Punto 1&#10;Punto 2&#10;Punto 3" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500" required></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pasos Numerados (Uno por línea)</label>
+                    <textarea id="formPasos" rows="3" placeholder="Paso 1...&#10;Paso 2..." class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500" required></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Alerta Pro (Opcional)</label>
+                    <input type="text" id="formAlerta" placeholder="Ej: Evita usar redes Wi-Fi públicas durante este proceso." class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-brand-500">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeNewModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium shadow-md shadow-brand-600/30">Guardar Solución</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA (SELLO OFICIAL MEDBASHA) -->
+    <footer class="mt-auto border-t border-gray-800/60 py-4 px-4 text-center">
+        <div class="inline-flex items-center gap-1.5 text-xs text-gray-500 opacity-60 hover:opacity-100 transition-opacity">
+            <div class="w-4 h-4 bg-gray-700 text-gray-300 flex items-center justify-center font-bold text-[9px] [clip-path:polygon(25%_0%,75%_0%,100%_50%,75%_100%,25%_100%,0%_50%)]">
+                MB
+            </div>
+            <span>medbasha</span>
+        </div>
+    </footer>
+
+    <!-- REGISTRO PWA Y LÓGICA DE CONTROL -->
+    <script>
+        const DB_NAME = 'SolucionaDB_v2';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'solutions';
+        let db = null;
+        let currentFilter = 'all';
+        let currentTimeFilter = 'all';
+
+        const initialData = [
+            {
+                id: 'sol_101',
+                pilar: 'tramites',
+                titulo: '¿Cómo obtener la Vida Laboral en PDF al instante?',
+                tiempo: 2,
+                snippet: '',
+                resumen_expres: ['Requiere Cl@ve o SMS', 'Descarga directa en PDF', '100% gratuito sin intermediarios'],
+                pasos: ['Accede a Import@ss (Sede Oficial)', 'Pulsa en "Ver mi vida laboral"', 'Autentícate y guarda el documento en PDF'],
+                alerta_pro: 'Nunca pagues en páginas externas no oficiales.',
+                utilidad: 99,
+                año_verificacion: 2026
+            },
+            {
+                id: 'sol_102',
+                pilar: 'tech_dev',
+                titulo: 'Reinicio rápido de Service Worker sin caché residual',
+                tiempo: 1,
+                snippet: 'navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));',
+                resumen_expres: ['Limpia registros bloqueados', 'Fuerza la descarga del nuevo sw.js', 'Ejecución en consola del navegador'],
+                pasos: ['Abre las Herramientas de Desarrollo (F12)', 'Pega el comando en la Consola de Comandos', 'Recarga la página con Ctrl + F5'],
+                alerta_pro: 'Recuerda cambiar el CACHE_NAME en sw.js para forzar la actualización global.',
+                utilidad: 96,
+                año_verificacion: 2026
+            }
+        ];
+
+        async function initApp() {
+            // Solicitud de almacenamiento persistente
+            if (navigator.storage && navigator.storage.persist) {
+                await navigator.storage.persist();
+            }
+
+            // Comprobar modal de bienvenida
+            if (!localStorage.getItem('soluciona_welcome_v2')) {
+                openWelcomeModal();
+            }
+
+            // Registro del Service Worker PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registrado en:', reg.scope))
+                    .catch(err => console.error('Error al registrar SW:', err));
+            }
+
+            // Inicializar IndexedDB
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                seedInitialData();
+            };
+        }
+
+        function seedInitialData() {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.count();
+            req.onsuccess = () => {
+                if (req.result === 0) {
+                    const writeTx = db.transaction(STORE_NAME, 'readwrite');
+                    initialData.forEach(item => writeTx.objectStore(STORE_NAME).add(item));
+                    writeTx.oncomplete = () => loadSolutions();
+                } else {
+                    loadSolutions();
+                }
+            };
+        }
+
+        function loadSolutions() {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).getAll();
+            req.onsuccess = () => renderSolutions(req.result);
+        }
+
+        function renderSolutions(solutions) {
+            const feed = document.getElementById('solutionsFeed');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            feed.innerHTML = '';
+
+            const filtered = solutions.filter(sol => {
+                const matchesFilter = currentFilter === 'all' || sol.pilar === currentFilter;
+                const matchesTime = currentTimeFilter === 'all' || sol.tiempo <= parseInt(currentTimeFilter);
+                const matchesSearch = sol.titulo.toLowerCase().includes(searchVal) || 
+                                     sol.resumen_expres.some(r => r.toLowerCase().includes(searchVal));
+                return matchesFilter && matchesTime && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                feed.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500">No hay soluciones que coincidan con los filtros.</div>`;
+                return;
+            }
+
+            filtered.forEach(sol => {
+                const badge = getPilarBadge(sol.pilar);
+                const card = document.createElement('article');
+                card.className = "bg-gray-800/90 border border-gray-700/80 rounded-2xl p-5 space-y-4 hover:border-brand-500/50 transition-all shadow-lg flex flex-col justify-between";
+                
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded text-xs font-semibold ${badge.bg} ${badge.color}">
+                                ${badge.label}
+                            </span>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-gray-400">⏱️ ${sol.tiempo} min</span>
+                                <span class="text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-full">
+                                    ✓ ${sol.año_verificacion || 2026}
+                                </span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-lg font-bold text-white leading-snug">${escapeHtml(sol.titulo)}</h2>
+
+                        <div class="bg-gray-900/70 p-3 rounded-xl border border-gray-700/50 space-y-1 text-xs text-gray-300">
+                            <span class="text-[10px] uppercase font-bold text-brand-400 block mb-1">⚡ Acción Rápida</span>
+                            ${sol.resumen_expres.map(r => `<div class="flex items-start gap-1.5"><span class="text-brand-500">•</span><span>${escapeHtml(r)}</span></div>`).join('')}
+                        </div>
+
+                        ${sol.snippet ? `
+                            <div class="bg-gray-950 border border-gray-700/60 p-2.5 rounded-xl flex items-center justify-between font-mono text-xs text-brand-300">
+                                <span class="truncate pr-2">${escapeHtml(sol.snippet)}</span>
+                                <button onclick="copySnippet('${escapeJs(sol.snippet)}')" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-2 py-1 rounded text-[11px] whitespace-nowrap">
+                                    📋 Copiar
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        ${sol.alerta_pro ? `
+                            <div class="bg-amber-950/40 border border-amber-800/40 p-2.5 rounded-xl text-xs text-amber-200/90 flex items-start gap-2">
+                                <span>⚠️</span>
+                                <span>${escapeHtml(sol.alerta_pro)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-700/50 flex items-center justify-between gap-2 text-xs">
+                        <button onclick="openFocusMode('${sol.id}')" class="flex-1 py-2 bg-brand-600/20 hover:bg-brand-600 text-brand-300 hover:text-white border border-brand-500/40 rounded-xl font-medium transition-colors text-center">
+                            🎯 Modo Enfoque
+                        </button>
+                        <button onclick="printChecklist('${sol.id}')" class="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl" title="Imprimir/Exportar Checklist">
+                            🖨️
+                        </button>
+                    </div>
+                `;
+                feed.appendChild(card);
+            });
+        }
+
+        function openFocusMode(id) {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get(id);
+            req.onsuccess = () => {
+                const sol = req.result;
+                if (!sol) return;
+
+                document.getElementById('focusTitle').innerText = sol.titulo;
+                document.getElementById('focusCategory').innerText = getPilarBadge(sol.pilar).label;
+                
+                const container = document.getElementById('focusStepsContainer');
+                container.innerHTML = '';
+
+                sol.pasos.forEach((p, idx) => {
+                    const stepEl = document.createElement('label');
+                    stepEl.className = "flex items-start gap-3 bg-gray-900/60 p-3 rounded-xl border border-gray-700/60 cursor-pointer hover:border-gray-500 transition-colors";
+                    stepEl.innerHTML = `
+                        <input type="checkbox" onchange="updateFocusProgress()" class="mt-1 w-4 h-4 accent-brand-500 rounded cursor-pointer">
+                        <span class="text-sm text-gray-200 leading-snug"><strong class="text-brand-400">Paso ${idx + 1}:</strong> ${escapeHtml(p)}</span>
+                    `;
+                    container.appendChild(stepEl);
+                });
+
+                updateFocusProgress();
+                document.getElementById('focusModal').classList.remove('hidden');
+            };
+        }
+
+        function updateFocusProgress() {
+            const checkboxes = document.querySelectorAll('#focusStepsContainer input[type="checkbox"]');
+            const checked = document.querySelectorAll('#focusStepsContainer input[type="checkbox"]:checked');
+            const percent = checkboxes.length ? Math.round((checked.length / checkboxes.length) * 100) : 0;
+
+            document.getElementById('focusProgressBar').style.width = percent + '%';
+            document.getElementById('focusProgressText').innerText = percent + '%';
+        }
+
+        function closeFocusModal() { document.getElementById('focusModal').classList.add('hidden'); }
+
+        function copySnippet(text) {
+            navigator.clipboard.writeText(text);
+            alert('¡Snippet copiado al portapapeles!');
+        }
+
+        function printChecklist(id) {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get(id);
+            req.onsuccess = () => {
+                const sol = req.result;
+                const win = window.open('', '_blank');
+                win.document.write(`
+                    <html>
+                    <head><title>${sol.titulo}</title></head>
+                    <body font-family="sans-serif" style="padding:20px;">
+                        <h2>${sol.titulo}</h2>
+                        <hr/>
+                        <h3>Checklist de Pasos:</h3>
+                        <ul>
+                            ${sol.pasos.map(p => `<li>[  ] ${p}</li>`).join('')}
+                        </ul>
+                    </body>
+                    </html>
+                `);
+                win.print();
+            };
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.replace('bg-brand-600', 'bg-gray-800'));
+            document.getElementById(`filter-${filter}`)?.classList.replace('bg-gray-800', 'bg-brand-600');
+            loadSolutions();
+        }
+
+        function setTimeFilter(time) {
+            currentTimeFilter = time;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('text-brand-400', 'font-bold', 'underline'));
+            document.getElementById(`time-${time}`)?.classList.add('text-brand-400', 'font-bold', 'underline');
+            loadSolutions();
+        }
+
+        function filterSolutions() { loadSolutions(); }
+
+        function handleSaveSolution(e) {
+            e.preventDefault();
+            const pilar = document.getElementById('formPilar').value;
+            const tiempo = parseInt(document.getElementById('formTiempo').value) || 2;
+            const titulo = document.getElementById('formTitulo').value.trim();
+            const snippet = document.getElementById('formSnippet').value.trim();
+            const resumen = document.getElementById('formResumen').value.split('\n').filter(r => r.trim() !== '');
+            const pasos = document.getElementById('formPasos').value.split('\n').filter(p => p.trim() !== '');
+            const alerta = document.getElementById('formAlerta').value.trim();
+
+            const newSol = {
+                id: 'sol_' + Date.now(),
+                pilar,
+                tiempo,
+                titulo,
+                snippet,
+                resumen_expres: resumen,
+                pasos,
+                alerta_pro: alerta,
+                utilidad: 100,
+                año_verificacion: 2026
+            };
+
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).add(newSol);
+            tx.oncomplete = () => {
+                closeNewModal();
+                document.getElementById('solutionForm').reset();
+                loadSolutions();
+            };
+        }
+
+        function getPilarBadge(pilar) {
+            switch(pilar) {
+                case 'tech_dev': return { label: '💻 Tech & Dev', bg: 'bg-blue-950/80', color: 'text-blue-400' };
+                case 'productividad': return { label: '⚡ Productividad', bg: 'bg-purple-950/80', color: 'text-purple-400' };
+                case 'tramites': return { label: '📜 Trámites', bg: 'bg-amber-950/80', color: 'text-amber-400' };
+                case 'emprendimiento': return { label: '🚀 Emprendimiento', bg: 'bg-rose-950/80', color: 'text-rose-400' };
+                default: return { label: 'General', bg: 'bg-gray-800', color: 'text-gray-300' };
+            }
+        }
+
+        function openWelcomeModal() { document.getElementById('welcomeModal').classList.remove('hidden'); }
+        function closeWelcomeModal() { localStorage.setItem('soluciona_welcome_v2', 'true'); document.getElementById('welcomeModal').classList.add('hidden'); }
+        function openNewModal() { document.getElementById('newSolutionModal').classList.remove('hidden'); }
+        function closeNewModal() { document.getElementById('newSolutionModal').classList.add('hidden'); }
+
+        function escapeHtml(str) { return str ? str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])) : ''; }
+        function escapeJs(str) { return str ? str.replace(/'/g, "\\'").replace(/"/g, '\\"') : ''; }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
